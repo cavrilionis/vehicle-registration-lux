@@ -13,5 +13,3 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Data and code for data analysis of vehicle registrations in Luxembourg  
 For more details see <https://data.public.lu/en/datasets/parc-automobile-du-luxembourg/>
-
-test
