@@ -1,0 +1,11 @@
+- Column OPE is in the PDF and the XSD but is missing from the XML data
+
+- Element 'CODCRB': '' is not a valid value of the local atomic type (23334 cases)
+- Element 'LIBCRB': 'ESSENCE / ETHANOL' is not a valid value of the local atomic type (61 cases)
+- Element 'LIBCRB': [facet 'enumeration'] The value 'ESSENCE / ETHANOL'	is not an element of the set 
+  {
+  'PAS DE CARBURANT', 'ESSENCE', 'DIESEL', 'LPG', 'ELECTRIQUE', 'GAZOGENE', 'ESSENCE + LPG', 'INCONNU', 'ESSENCE + CNG', 
+  'CNG(GAZ NATUREL COMPRIME)', 'HYBRIDE - ESS./ELEC. NOVC', 'DIESEL (GASOIL-FUEL)', 'ESSENCE + METHANE', 'HYBRIDE - ESS./ELEC. OVC', 
+  'HYBRIDE - ELECTRIQUE/ESS.', 'HYBRIDE - DIE./ELEC. NOVC', 'ESSENCE/ETHANOL', 'DIESEL + LPG', 'HYBRIDE - DIE./ELEC. OVC', 'LNG', ''
+  } (61 cases)
+

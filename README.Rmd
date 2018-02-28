@@ -1,0 +1,17 @@
+---
+title: "vehicle-registration-lux"
+author: "Christos Avrilionis"
+date: "February 27, 2018"
+output: 
+  html_document: 
+    self_contained: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Data and code for data analysis of vehicle registrations in Luxembourg  
+For more details see <https://data.public.lu/en/datasets/parc-automobile-du-luxembourg/>
+
+test
