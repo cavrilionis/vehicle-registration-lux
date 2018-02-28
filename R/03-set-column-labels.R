@@ -1,13 +1,21 @@
 
-# Check column labels
-colnames(vehicles)
-label(vehicles)
+########## 03-set-column-labels.R ##########
 
-# The dataset does not have column labels
+# Copy dataset
+vehcol <- vehraw
+
+# Save dataset
+save(vehcol, file = file.path("input", "vehcol.RData"))
+
+# Check if column labels already exist
+colnames(vehcol)
+label(vehcol)
+
+# The dataset vehcol does not have column labels
 
 # Read column names and labels from external file
 column_labels <- read.fwf(
-  file = "column_labels.txt",
+  file = file.path("doc", "column_labels.txt"),
   widths = c(21, 51, 75),
   header = FALSE,
   col.names = c("Column.name", "Column.label.FR", "Column.label.EN")
@@ -20,5 +28,10 @@ column_labels <- column_labels[2:nrow(column_labels),]
 Column.name <- as.vector(str_trim(column_labels[, 1]))
 Column.label.EN <- as.vector(column_labels[, 3])
 names(Column.label.EN) <- Column.name
-vehicles <- upData(obj = vehicles, labels = Column.label.EN)
-label(vehicles)
+vehcol <- upData(obj = vehcol, labels = Column.label.EN)
+
+# Check new labels
+label(vehcol)
+
+# Save dataset
+save(vehcol, file = file.path("input", "vehcol.RData"))

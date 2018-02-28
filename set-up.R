@@ -1,11 +1,19 @@
 
+########## set-up.R ##########
+
 cat("\014")
-# rm(list = ls(all = TRUE))
 
 # Required libraries
 
 list.of.packages <-
-  c("XML", "Hmisc", "pdftools", "stringr", "car", "dplyr", "padr", "utils")
+  c("XML",
+    "Hmisc",
+    "pdftools",
+    "stringr",
+    "car",
+    "dplyr",
+    "padr",
+    "utils")
 
 new.packages <-
   list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
