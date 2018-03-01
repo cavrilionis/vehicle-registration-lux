@@ -3,11 +3,11 @@
 
 # Parse XML using package "XML"
 doc <-
-  xmlInternalTreeParse(file.path("input", "Parc_Automobile_201802.xml"))
+  xmlInternalTreeParse(file.path("input", "Parc_Automobile_201803.xml"))
 
 # Parse XSD using package "XML"
 xsd <-
-  xmlParse(file.path("input", "Parc_Automobile_v1.0.xsd"), isSchema = TRUE)
+  xmlParse(file.path("doc", "Parc_Automobile_v1.0.xsd"), isSchema = TRUE)
 
 # Validate XML using XSD using package "XML"
 out <- xmlSchemaValidate(schema = xsd, doc = doc)
@@ -16,7 +16,7 @@ out.status <- out["status"]
 out.errors <- out["errors"]
 out.warnings <- out["warnings"]
 
-XMLValidationStatus <- dplyr::as_data_frame(out.status)
+XMLValidationStatus <- as.data.frame(out.status)
 
 XMLValidationErrors <- dplyr::as_data_frame(out.errors)
 
@@ -26,9 +26,19 @@ write.table(
   sep = "|"
 )
 
+# TODO: Count XML validation errors
+
+# Import colClasses
+colClasses <-
+  read.xlsx(file.path("doc", "colClasses.xlsx"),
+            sheet = "Sheet2",
+            colNames = TRUE)
+
 # Convert XML to data frame using package "XML"
 vehraw <-
-  xmlToDataFrame(getNodeSet(doc, "//VEHICLE"), stringsAsFactors = FALSE)
+  xmlToDataFrame(getNodeSet(doc, "//VEHICLE"),
+                 colClasses = colClasses,
+                 stringsAsFactors = FALSE)
 
 #View dataset
 View(vehraw)
