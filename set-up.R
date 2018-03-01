@@ -1,8 +1,6 @@
 
 ########## set-up.R ##########
 
-cat("\014")
-
 # Required libraries
 
 list.of.packages <-
@@ -12,8 +10,10 @@ list.of.packages <-
     "stringr",
     "car",
     "dplyr",
+    "tidyr",
     "padr",
-    "utils")
+    "utils",
+	"openxlsx")
 
 new.packages <-
   list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
