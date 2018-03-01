@@ -2,13 +2,7 @@
 ########## 03-set-column-labels.R ##########
 
 # Get dataset
-vehraw <- load(file.path("input", "vehraw.RData"))
-
-# Copy dataset
-vehcol <- vehraw
-
-# Save dataset
-save(vehcol, file = file.path("input", "vehcol.RData"))
+vehcol <- get(load(file.path("input", "vehraw.RData")))
 
 # Check if column labels already exist
 colnames(vehcol)
@@ -25,7 +19,7 @@ column_labels <- read.fwf(
 )
 
 # Deleting OPE because it is not in the dataset
-column_labels <- column_labels[2:nrow(column_labels),]
+column_labels <- column_labels[2:nrow(column_labels), ]
 
 # Adding column labels
 Column.name <- as.vector(str_trim(column_labels[, 1]))
