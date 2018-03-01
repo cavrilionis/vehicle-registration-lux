@@ -1,5 +1,42 @@
+
+# RStudio files
 .Rproj.user
+
+# History files
 .Rhistory
+.Rapp.history
+
+# Session Data files
 .RData
 .Ruserdata
+
+# Example code in package build process
+*-Ex.R
+
+# Output files from R CMD build
+/*.tar.gz
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+.httr-oauth
+
+# knitr and R markdown default cache directories
+/*_cache/
+/cache/
+
+# Temporary files created by R markdown
+*.utf8.md
+*.knit.md
+
+# Project files
 /input/Parc_Automobile_201802.xml
+/input/Parc_Automobile_201803.xml
+/input/Parc_Automobile_201803.xlsx
+/doc/Parc_Automobile_v1.0.xsd
+/doc/Description_des_Donnees_Exportees_vers_OpenData_v.1.2.pdf
