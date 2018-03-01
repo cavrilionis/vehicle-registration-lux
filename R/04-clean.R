@@ -1,6 +1,9 @@
 
 ########## 04-clean.R ##########
 
+# Get dataset
+vehcol <- load(file.path("input", "vehcol.RData"))
+
 # Copy dataset
 vehcln <- vehcol
 

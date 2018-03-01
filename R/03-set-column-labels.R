@@ -1,6 +1,9 @@
 
 ########## 03-set-column-labels.R ##########
 
+# Get dataset
+vehraw <- load(file.path("input", "vehraw.RData"))
+
 # Copy dataset
 vehcol <- vehraw
 
