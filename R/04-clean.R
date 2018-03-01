@@ -2,13 +2,16 @@
 ########## 04-clean.R ##########
 
 # Get dataset
-vehcol <- load(file.path("input", "vehcol.RData"))
+vehcln <- get(load(file.path("input", "vehcol.RData")))
 
-# Copy dataset
-vehcln <- vehcol
+# OPE is shown in the PDF but it is absent in the XSD and XML
 
-# Save dataset
-save(vehcln, file = file.path("input", "vehcln.RData"))
+# Padding zeros to CATSTC
+typeof(vehcln$CATSTC)
+vehcln$CATSTC.v2 <- sprintf("%02d", as.integer(vehcln$CATSTC))
+typeof(vehcln$CATSTC.v2)
+label(vehcln$CATSTC.v2) <- "Category Code Statec"
+vehcln[1:5,c("CATSTC","CATSTC.v2")]
 
 # Recoding CATSTC into LIBSTC
 vehcln$LIBSTC <- car::recode(
@@ -37,15 +40,10 @@ vehcln$LIBSTC <- car::recode(
   "
 )
 
-# Padding CATSTC
-typeof(vehcln$CATSTC)
-vehcln$CATSTC.v2 <- sprintf("%02d", as.integer(vehcln$CATSTC))
-typeof(vehcln$CATSTC.v2)
-label(vehcln$CATSTC.v2) <- "Category Code Statec"
 label(vehcln$LIBSTC) <- "Category Label Statec"
 
 # Verify that CATSTC.v2 and LIBSTC are calculated correctly
-arrange(summarize(group_by(vehcln, CATSTC.v2, CATSTC, LIBSTC), Count = n()), CATSTC.v2)
+arrange(summarize(group_by(vehcln, CATSTC, CATSTC.v2, LIBSTC), Count = n()), CATSTC.v2)
 
 # Drop original CATSTC
 vehcln <- select(vehcln, -CATSTC)
@@ -53,6 +51,11 @@ vehcln <- select(vehcln, -CATSTC)
 # Rename CATSTC.v2 to CATSTC
 names(vehcln)[names(vehcln) == "CATSTC.v2"] <- "CATSTC"
 
+
+
+
+
+# Some LIBCAR values are identical to CATSTC
 # Set LIBCAR values where needed
 typeof(vehcln$LIBCAR)
 vehcln$LIBCAR.v2 <- vehcln$LIBCAR
