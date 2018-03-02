@@ -4,6 +4,7 @@
 # This is the master program which executes all the others
 
 cat("\014")
+rm(list = ls())
 
 source(file.path("set-up.R"), echo = TRUE)
 
