@@ -11,14 +11,8 @@ xsd <-
 
 # Validate XML using XSD using package "XML"
 out <- xmlSchemaValidate(schema = xsd, doc = doc)
-
-out.status <- out["status"]
 out.errors <- out["errors"]
-out.warnings <- out["warnings"]
-
-XMLValidationStatus <- as.data.frame(out.status)
-
-XMLValidationErrors <- dplyr::as_data_frame(out.errors)
+XMLValidationErrors <- as_data_frame(out.errors)
 
 write.table(
   XMLValidationErrors,
@@ -26,20 +20,81 @@ write.table(
   sep = "|"
 )
 
-# TODO: Count XML validation errors
-# TODO: For colClasses use CSV instead of XLSX file
+# Remove unnecessary line breaks manually in XML-Validation-Errors.txt
+# and create a copy as XML-Validation-Errors-clean.txt
+
+# Count XML validation errors
+
+XML.vld.err <-
+  read.delim(
+    file.path("output", "XML-Validation-Errors-clean.txt"),
+    header = TRUE,
+    sep = "|"
+  )
+
+XML.vld.err <-
+  mutate(
+    XML.vld.err,
+    Error.v2 = ifelse(
+      substr(Error, 1, 27) == "list(msg = Element 'CODCRB'",
+      "Empty CODCRB",
+      ifelse(
+        substr(Error, 1, 50) == "list(msg = Element 'LIBCRB': [facet 'enumeration']",
+        "LIBCRB 'ESSENCE / ETHANOL' is not an element in the XSD enumeration",
+        ifelse(
+          substr(Error, 1, 95) == "list(msg = Element 'LIBCRB': 'ESSENCE / ETHANOL' is not a valid value of the local atomic type.",
+          "LIBCRB 'ESSENCE / ETHANOL' is not a valid value of the local atomic type",
+          NA
+        )
+      )
+    )
+  )
+
+XML.vld.err <- select(XML.vld.err, -Error)
+XML.vld.err <- rename(XML.vld.err, "Error" = "Error.v2")
+XML.vld.rpt <- as.data.frame(table(XML.vld.err$Error))
+names(XML.vld.rpt) <- c("Error", "Frequency")
+View(XML.vld.rpt)
+
+ggplot(data = XML.vld.err) +
+  geom_bar(mapping = aes(Error)) +
+  ggtitle("XML validation errors") +
+  scale_y_log10(name = "Frequency", limits = c(NA, 1e5)) +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_few() +
+  scale_x_discrete(
+    labels = c(
+      "Empty CODCRB" = "Empty\nCODCRB",
+      "LIBCRB 'ESSENCE / ETHANOL' is not an element in the XSD enumeration" = "LIBCRB 'ESSENCE / ETHANOL'\nis not an element in the\nXSD enumeration",
+      "LIBCRB 'ESSENCE / ETHANOL' is not a valid value of the local atomic type" = "LIBCRB 'ESSENCE / ETHANOL'\nis not a valid value of the\nlocal atomic type"
+    )
+  )
+
+ggsave(plot = last_plot(),
+       path = "graphics",
+       filename = "XML-validation-errors.png")
 
 # Import colClasses
 colClasses <-
-  read.xlsx(file.path("doc", "colClasses.xlsx"),
-            sheet = "Sheet2",
-            colNames = TRUE)
+  read.delim(file.path("doc", "colClasses.csv"), sep = "|")
+
+# Create class to convert dates from character to date
+setClass('myDate')
+setAs("character", "myDate", function(from)
+  as.Date(from, format = "%Y%m%d"))
 
 # Convert XML to data frame using package "XML"
 vehraw <-
-  xmlToDataFrame(getNodeSet(doc, "//VEHICLE"),
-                 colClasses = colClasses,
-                 stringsAsFactors = FALSE)
+  xmlToDataFrame(
+    getNodeSet(doc, "//VEHICLE"),
+    colClasses = colClasses,
+    stringsAsFactors = FALSE,
+    homogeneous = TRUE
+  )
+
+# Get the structure of the dataset
+str(vehraw)
 
 # Get how many rows and columns the dataset has
 cat("The dataset has",
@@ -50,3 +105,11 @@ cat("The dataset has",
 
 # Save dataset
 save(vehraw, file = file.path("input", "vehraw.RData"))
+
+# Remove objects
+rm("doc",
+   "xsd",
+   "out",
+   "out.errors",
+   "XMLValidationErrors",
+   "colClasses")
