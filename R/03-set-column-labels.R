@@ -19,11 +19,12 @@ column_labels <- read.fwf(
 )
 
 # Deleting OPE because it is not in the dataset
-column_labels <- column_labels[2:nrow(column_labels), ]
+column_labels <- column_labels[2:nrow(column_labels),]
 
 # Adding column labels
 Column.name <- as.vector(str_trim(column_labels[, 1]))
-Column.label.EN <- as.vector(column_labels[, 3])
+Column.label.EN <- as.vector(str_squish(column_labels[, 3]))
+Column.label.EN
 names(Column.label.EN) <- Column.name
 vehcol <- upData(obj = vehcol, labels = Column.label.EN)
 
