@@ -324,7 +324,7 @@ ggsave(plot = last_plot(),
        filename = "CATEU.png")
 
 # Method 3
-dplyr::count(vehcln$CATEU)
+dplyr::count(vehcln,CATEU, sort = TRUE)
 
 # COUL
 vehcln$COUL[which(vehcln$COUL == " ")] <- NA

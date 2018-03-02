@@ -27,6 +27,7 @@ write.table(
 )
 
 # TODO: Count XML validation errors
+# TODO: For colClasses use CSV instead of XLSX file
 
 # Import colClasses
 colClasses <-
@@ -39,9 +40,6 @@ vehraw <-
   xmlToDataFrame(getNodeSet(doc, "//VEHICLE"),
                  colClasses = colClasses,
                  stringsAsFactors = FALSE)
-
-#View dataset
-View(vehraw)
 
 # Get how many rows and columns the dataset has
 cat("The dataset has",
