@@ -5,15 +5,15 @@
 
 list.of.packages <-
   c("XML",
-    "Hmisc",
-    "pdftools",
+    # "Hmisc",
     "stringr",
-    "car",
+    # "car",
     "dplyr",
     "tidyr",
-    "padr",
-    "utils",
-	"openxlsx")
+    # "padr",
+    # "utils",
+    "ggplot2",
+    "ggthemes")
 
 new.packages <-
   list.of.packages[!(list.of.packages %in% installed.packages()[, "Package"])]
@@ -27,3 +27,6 @@ for (i in list.of.packages)
 }
 
 getwd()
+
+# Remove objects
+rm("i", "list.of.packages", "new.packages")
