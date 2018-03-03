@@ -9,6 +9,7 @@ list.of.packages <-
     "stringr",
     # "car",
     "dplyr",
+    "tibble",
     "tidyr",
     # "padr",
     # "utils",
