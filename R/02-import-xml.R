@@ -11,8 +11,7 @@ xsd <-
 
 # Validate XML using XSD using package "XML"
 out <- xmlSchemaValidate(schema = xsd, doc = doc)
-out.errors <- out["errors"]
-XMLValidationErrors <- as_data_frame(out.errors)
+XMLValidationErrors <- as_data_frame(out["errors"])
 
 write.table(
   XMLValidationErrors,
@@ -79,6 +78,8 @@ ggsave(plot = last_plot(),
 colClasses <-
   read.delim(file.path("doc", "colClasses.csv"), sep = "|")
 
+colClasses <- as.vector(colClasses$Class)
+
 # Create class to convert dates from character to date
 setClass('myDate')
 setAs("character", "myDate", function(from)
@@ -107,9 +108,9 @@ cat("The dataset has",
 save(vehraw, file = file.path("input", "vehraw.RData"))
 
 # Remove objects
-rm("doc",
-   "xsd",
+rm("colClasses",
+   "doc",
    "out",
-   "out.errors",
    "XMLValidationErrors",
-   "colClasses")
+   "xsd"
+)
