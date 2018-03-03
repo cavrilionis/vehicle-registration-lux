@@ -5,7 +5,7 @@
 
 list.of.packages <-
   c("XML",
-    # "Hmisc",
+    "Hmisc",
     "stringr",
     # "car",
     "dplyr",
