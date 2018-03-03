@@ -33,3 +33,9 @@ label(vehcol)
 
 # Save dataset
 save(vehcol, file = file.path("input", "vehcol.RData"))
+
+# Remove objects
+rm("column_labels",
+   "Column.label.EN",
+   "Column.name"
+)
