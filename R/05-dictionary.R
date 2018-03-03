@@ -31,7 +31,16 @@ dict.typeof
 dict <- inner_join(dict.order, dict.labels, by = "Column.name")
 View(dict)
 
+attributes(vehcln$INFNOX)$measurement <- "continuous"
+
+attributes(vehcln$CODCAR)$source <- "raw"
+attributes(vehcln$LIBSTC)$source <- "derived"
+
+toto <- attributes(vehcln$LIBSTC)
+toto$source
+
 detach(devtools)
+
 list.df.var.types(vehcln)
 
 
