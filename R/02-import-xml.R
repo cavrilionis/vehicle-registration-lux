@@ -51,9 +51,11 @@ XML.vld.err <-
 
 XML.vld.err <- select(XML.vld.err, -Error)
 XML.vld.err <- rename(XML.vld.err, "Error" = "Error.v2")
+save(XML.vld.err, file = file.path("output", "XML-Validation-Errors.RData"))
+
 XML.vld.rpt <- as.data.frame(table(XML.vld.err$Error))
 names(XML.vld.rpt) <- c("Error", "Frequency")
-View(XML.vld.rpt)
+save(XML.vld.rpt, file = file.path("output", "XML-Validation-Report.RData"))
 
 ggplot(data = XML.vld.err) +
   geom_bar(mapping = aes(Error)) +
@@ -111,6 +113,9 @@ save(vehraw, file = file.path("input", "vehraw.RData"))
 rm("colClasses",
    "doc",
    "out",
+   "vehraw",
    "XMLValidationErrors",
+   "XML.vld.err",
+   "XML.vld.rpt",
    "xsd"
 )
