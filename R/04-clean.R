@@ -1,4 +1,7 @@
 
+cat("\014")
+rm(list = ls())
+
 ########## 04-clean.R ##########
 
 # Get dataset
@@ -291,19 +294,6 @@ label(vehcln$LIBCAR) <- "Bodywork wording"
 
 # Frequency tables
 
-FreqTable <- function(x) {
-  myDF <- as.data.frame(table(x, exclude = NULL))
-  myDF$CumFreq <- cumsum(myDF$Freq)
-  myDF$Prop <- round(100 * prop.table(myDF$Freq), 2)
-  myDF$CumProp <- cumsum(myDF$Prop)
-  myDF
-}
-
-# Method 1
-CATSTC1 <- FreqTable(vehcln$CATSTC)
-CATSTC1
-
-# Method 2
 CATSTC2 <- summarise(group_by(vehcln, CATSTC), Freq = n())
 CATSTC2$CumFreq <- cumsum(CATSTC2$Freq)
 CATSTC2$Prop <- round(100 * prop.table(CATSTC2$Freq), 2)
@@ -327,10 +317,6 @@ ggsave(plot = last_plot(),
        path = "output",
        filename = "CATSTC.png")
 
-# Method 3
-CATSTC3 <- count(vehcln, CATSTC, sort = TRUE)
-CATSTC3
-
 # COUL
 vehcln$COUL[which(vehcln$COUL == " ")] <- NA
 COUL <- summarise(group_by(vehcln, COUL), Freq = n())
@@ -346,6 +332,8 @@ vehcln$PAYPVN[which(vehcln$PAYPVN == "")] <- NA
 PAYPVN <- summarise(group_by(vehcln, PAYPVN), Freq = n())
 PAYPVN
 View(PAYPVN)
+
+# Remove duplicate values
 
 # Reorder columns
 vehcln <-  vehcln[c(
@@ -406,10 +394,38 @@ vehcln <-  vehcln[c(
   "EUNORM"
 )]
 
+paste(
+  "The dataset has",
+  ncol(vehcln),
+  "columns."
+)
+
+paste(
+  "The dataset has",
+  nrow(vehcln),
+  "rows."
+)
+
+paste(
+  "The dataset has",
+  ncol(vehcln) * nrow(vehcln),
+  "values."
+)
+
+paste(
+  "The dataset has",
+  sum(is.na(vehcln)),
+  "missing values (",
+  round(100 * sum(is.na(vehcln)) / (ncol(vehcln) * nrow(vehcln)), 1),
+  "%)."
+)
+
 # Save dataset
 save(vehcln, file = file.path("input", "vehcln.RData"))
 
 # Remove objects
-rm("column_labels",
-   "Column.label.EN",
-   "Column.name")
+# rm("column_labels",
+#    "Column.label.EN",
+#    "Column.name",
+#    "vehcln"
+# )
