@@ -1,7 +1,4 @@
 
-cat("\014")
-rm(list = ls())
-
 ########## 05-dictionary.R ##########
 
 # Get dataset
@@ -53,28 +50,59 @@ dict.na <- as.data.frame(t(dict.na))
 dict.na <-
   rownames_to_column(dict.na, var = "Column.name")
 dict.na <- rename(dict.na, "Count.missing" = "V1")
-dict.na$Pct.missing <- round(100 * dict.na$Count.missing / nrow(vehcln),2)
+dict.na$Pct.missing <-
+  round(100 * dict.na$Count.missing / nrow(vehcln), 2)
 
 # Gather all dictionary columns
 dict <-
-  bind_cols(
-    dict.order,
-    dict.labels,
-    dict.class[2],
-    dict.type[2],
-    dict.n_distinct[2],
-    dict.na[2:3]
-  )
+  bind_cols(dict.order,
+            dict.labels,
+            dict.class[2],
+            dict.type[2],
+            dict.n_distinct[2],
+            dict.na[2:3])
 
 # Count of distinct values excl. missing
 dict$Count.distinct.excl.na <- dict$Count.distinct
-dict$Count.distinct.excl.na <- ifelse(dict$Column.class != "character" & dict$Count.missing > 0, dict$Count.distinct - 1, dict$Count.distinct)
+dict$Count.distinct.excl.na <-
+  ifelse(
+    dict$Column.class != "character" &
+      dict$Count.missing > 0,
+    dict$Count.distinct - 1,
+    dict$Count.distinct
+  )
 
 # Count of distinct values incl. missing
 dict$Count.distinct.incl.na <- dict$Count.distinct
-dict$Count.distinct.incl.na <- ifelse(dict$Column.class == "character" & dict$Count.missing > 0, dict$Count.distinct + 1, dict$Count.distinct)
+dict$Count.distinct.incl.na <-
+  ifelse(
+    dict$Column.class == "character" &
+      dict$Count.missing > 0,
+    dict$Count.distinct + 1,
+    dict$Count.distinct
+  )
 
-dict <- select(dict,-Count.distinct)
+dict <- select(dict, -Count.distinct)
+
+# Column source
+dict$Column.source <- "Raw"
+dict$Column.source[which(dict$Column.name == "LIBSTC")] <- "Derived"
+
+# Measurement
+dict$Column.measurement <-
+  ifelse(dict$Column.class == "character", "Nominal", "Continuous")
+
+# Check that ABS and ASR have Class = logical, measurement = Nominal
+
+# Role
+dict$Column.role <-
+  ifelse((
+    dict$Column.class == "character" &
+      dict$Count.distinct.excl.na >= 50
+  ) | (dict$Column.class != "character" & dict$Pct.missing >= 50),
+  "Rejected",
+  "Input"
+  )
 
 dict <- upData(
   obj = dict,
@@ -85,10 +113,13 @@ dict <- upData(
       Column.label = "Label",
       Column.class = "Class",
       Column.type = "Type",
+      Column.measurement = "Measurement",
       Count.distinct.incl.na = "Count of distinct values incl. missing",
       Count.distinct.excl.na = "Count of distinct values excl. missing",
       Count.missing = "Count of missing values",
-      Pct.missing = "Percent of missing values"
+      Pct.missing = "Percent of missing values",
+      Column.source = "Source",
+      Column.role = "Role"
     )
 )
 
@@ -99,92 +130,28 @@ dict <-  dict[c(
   "Column.label",
   "Column.class",
   "Column.type",
+  "Column.measurement",
   "Count.distinct.incl.na",
   "Count.distinct.excl.na",
   "Count.missing",
-  "Pct.missing"
+  "Pct.missing",
+  "Column.source",
+  "Column.role"
 )]
 
-View(dict)
+# Save dictionary
+save(dict, file = file.path("doc", "data-dictionary.RData"))
 
-
-
-### SAVAS ###
-
-# Source
-
-str(vehcln)
-
-for (i in 1:ncol(vehcln)){
-  cat("attributes(vehcln$",names(vehcln[i]),")$source <- 'Raw'\n",sep = "")
-}
-
-attributes(vehcln$CATSTC)$source <- 'Raw'
-attributes(vehcln$LIBSTC)$source <- 'Derived'
-attributes(vehcln$CODCAR)$source <- 'Raw'
-attributes(vehcln$LIBCAR)$source <- 'Raw'
-attributes(vehcln$CATEU)$source <- 'Raw'
-attributes(vehcln$COUL)$source <- 'Raw'
-attributes(vehcln$INDUTI)$source <- 'Raw'
-attributes(vehcln$PAYPVN)$source <- 'Raw'
-attributes(vehcln$CODMRQ)$source <- 'Raw'
-attributes(vehcln$LIBMRQ)$source <- 'Raw'
-attributes(vehcln$TYPUSI)$source <- 'Raw'
-attributes(vehcln$TYPCOM)$source <- 'Raw'
-attributes(vehcln$PVRNUM)$source <- 'Raw'
-attributes(vehcln$PVRVAR)$source <- 'Raw'
-attributes(vehcln$PVRVER)$source <- 'Raw'
-attributes(vehcln$DATCIRPRM)$source <- 'Raw'
-attributes(vehcln$DATCIR_GD)$source <- 'Raw'
-attributes(vehcln$DATCIR)$source <- 'Raw'
-attributes(vehcln$DATHORCIR)$source <- 'Raw'
-attributes(vehcln$MVID)$source <- 'Raw'
-attributes(vehcln$MMA)$source <- 'Raw'
-attributes(vehcln$MMAENS)$source <- 'Raw'
-attributes(vehcln$MMAATT)$source <- 'Raw'
-attributes(vehcln$MMARSF)$source <- 'Raw'
-attributes(vehcln$MMARAF)$source <- 'Raw'
-attributes(vehcln$I4X4)$source <- 'Raw'
-attributes(vehcln$ABS)$source <- 'Raw'
-attributes(vehcln$ASR)$source <- 'Raw'
-attributes(vehcln$PLAAVA)$source <- 'Raw'
-attributes(vehcln$PLAARR)$source <- 'Raw'
-attributes(vehcln$PLASAV)$source <- 'Raw'
-attributes(vehcln$PLASAR)$source <- 'Raw'
-attributes(vehcln$PLADEB)$source <- 'Raw'
-attributes(vehcln$PLAASS)$source <- 'Raw'
-attributes(vehcln$LON)$source <- 'Raw'
-attributes(vehcln$LAR)$source <- 'Raw'
-attributes(vehcln$HAU)$source <- 'Raw'
-attributes(vehcln$ESSIM)$source <- 'Raw'
-attributes(vehcln$ESTAN)$source <- 'Raw'
-attributes(vehcln$ESTRI)$source <- 'Raw'
-attributes(vehcln$EMPMAX)$source <- 'Raw'
-attributes(vehcln$LARES1)$source <- 'Raw'
-attributes(vehcln$LARES2)$source <- 'Raw'
-attributes(vehcln$TYPMOT)$source <- 'Raw'
-attributes(vehcln$CODCRB)$source <- 'Raw'
-attributes(vehcln$LIBCRB)$source <- 'Raw'
-attributes(vehcln$NBRCYL)$source <- 'Raw'
-attributes(vehcln$PKW)$source <- 'Raw'
-attributes(vehcln$CYD)$source <- 'Raw'
-attributes(vehcln$INFOUTI)$source <- 'Raw'
-attributes(vehcln$INFCO2)$source <- 'Raw'
-attributes(vehcln$L100KM)$source <- 'Raw'
-attributes(vehcln$INFPARTICULE)$source <- 'Raw'
-attributes(vehcln$INFNOX)$source <- 'Raw'
-attributes(vehcln$EUNORM)$source <- 'Raw'
-
-str(vehcln)
-attr(vehcln$LIBSTC,"source")
-
-for (i in seq(1,ncol(vehcln))){
-  tmp <- attr(vehcln$names(vehcln[i]),"source")
-  dict.source <- c(dict.source, tmp)
-}
-
-
-# attr(MyData$VAR, "ATT") <- NULL
-
-# Measurement
-attributes(vehcln$INFNOX)$measurement <- "Continuous"
+# Remove objects
+rm(
+  "dict",
+  "dict.class",
+  "dict.labels",
+  "dict.n_distinct",
+  "dict.na",
+  "dict.names",
+  "dict.order",
+  "dict.storage",
+  "dict.type",
+  "vehcln"
+)
