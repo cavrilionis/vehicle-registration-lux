@@ -1,21 +1,18 @@
 
-cat("\014")
-rm(list = ls())
-
 ########## 04-clean.R ##########
 
 # Get dataset
 vehcln <- get(load(file.path("input", "vehcol.RData")))
 
+### OPE ###
 # OPE is shown in the PDF but it is absent in the XSD and XML
 
+### CATSTC ###
 # Padding zeros to CATSTC
-typeof(vehcln$CATSTC)
 vehcln$CATSTC.v2 <- sprintf("%02d", as.integer(vehcln$CATSTC))
-typeof(vehcln$CATSTC.v2)
 label(vehcln$CATSTC.v2) <- "Category Code Statec"
-vehcln[1:5, c("CATSTC", "CATSTC.v2")]
 
+### LIBSTC ###
 # Recoding CATSTC into LIBSTC
 vehcln$LIBSTC <- recode(
   vehcln$CATSTC,
@@ -53,9 +50,15 @@ vehcln <- select(vehcln, -CATSTC)
 # Rename CATSTC.v2 to CATSTC
 vehcln <- rename(vehcln, "CATSTC" = "CATSTC.v2")
 
+### CODCAR ###
+# No need for cleaning
+# CODCAR = "ZZ" does not appear in the
+# RÈGLEMENT (UE) No 678/2011 DE LA COMMISSION du 14 juillet 2011
+
+### LIBCAR ###
 # Some LIBCAR values are identical to CATSTC
-# Set LIBCAR values where needed
-typeof(vehcln$LIBCAR)
+# Set LIBCAR.v2 values where LIBCAR values are identical to CATSTC
+
 vehcln$LIBCAR.v2 <- vehcln$LIBCAR
 
 vehcln[which(vehcln$CODCAR == "AA"), "LIBCAR.v2"] <-
@@ -275,12 +278,13 @@ vehcln[which(vehcln$CODCAR == "SG"), "LIBCAR.v2"] <-
 vehcln[which(vehcln$CODCAR == "SG18"), "LIBCAR.v2"] <-
   str_to_upper("Groupe spécial / Benne à ordures ménagères")
 
+# LIBCAR = 'ZZ' does not apprear in the EU law. Set to missing. 
 vehcln$LIBCAR[which(vehcln$CODCAR == "ZZ")] <- NA
 vehcln$LIBCAR.v2[which(vehcln$CODCAR == "ZZ")] <- NA
 
-# Data cleansing of LIBCAR where CODCAR = "393C"
-vehcln[which(vehcln$CODCAR == "393C"), c("LIBCAR.v2")] <-
-  str_to_upper("EQUI. ELECT. / COMPRESSEUR")
+# Data cleansing of LIBCAR.v2 where CODCAR = "393C"
+vehcln[which(vehcln$CODCAR == "393C"), "LIBCAR.v2"] <-
+  "EQUI. ELECT. / COMPRESSEUR"
 
 CODCAR.LIBCAR <-
   arrange(summarise(group_by(vehcln, CODCAR, LIBCAR, LIBCAR.v2), Count = n()), CODCAR)
@@ -292,48 +296,187 @@ vehcln <- select(vehcln, -LIBCAR)
 vehcln <- rename(vehcln, "LIBCAR" = "LIBCAR.v2")
 label(vehcln$LIBCAR) <- "Bodywork wording"
 
-# Frequency tables
+### CATEU ###
+vehcln$CATEU[which(vehcln$CATEU == "")] <- NA
 
-CATSTC2 <- summarise(group_by(vehcln, CATSTC), Freq = n())
-CATSTC2$CumFreq <- cumsum(CATSTC2$Freq)
-CATSTC2$Prop <- round(100 * prop.table(CATSTC2$Freq), 2)
-CATSTC2$CumProp <- round(cumsum(CATSTC2$Prop), 1)
-label(CATSTC2$Freq) <- "Frequency"
-label(CATSTC2$CumFreq) <- "Cumulative frequency"
-label(CATSTC2$Prop) <- "Percent"
-label(CATSTC2$CumProp) <- "Cumulative percent"
-
-CATSTC2
-
-CATSTC2$CATSTC[which(CATSTC2$Prop < 5)] <- "Other"
-
-ggplot(data = vehcln, aes(x = CATSTC)) +
-  geom_bar()
-
-ggplot(data = CATSTC2, aes(x = CATSTC, y = Prop)) +
-  geom_bar(stat = "identity")
-
-ggsave(plot = last_plot(),
-       path = "output",
-       filename = "CATSTC.png")
-
-# COUL
+### COUL ###
 vehcln$COUL[which(vehcln$COUL == " ")] <- NA
-COUL <- summarise(group_by(vehcln, COUL), Freq = n())
-COUL
-View(COUL)
 
-# INDUTI
-INDUTI <- summarise(group_by(vehcln, INDUTI), Freq = n())
-View(INDUTI)
+### INDUTI ###
+# No need for cleaning
 
-# PAYPVN
-vehcln$PAYPVN[which(vehcln$PAYPVN == "")] <- NA
-PAYPVN <- summarise(group_by(vehcln, PAYPVN), Freq = n())
-PAYPVN
-View(PAYPVN)
+### LIBUTI ###
+# Recoding INDUTI into LIBUTI
+vehcln$LIBUTI <- recode(
+  vehcln$INDUTI,
+  '0' = 'Neant',
+  'A' = 'Ambulance',
+  'C' = 'Location avec chauffeur',
+  'D' = 'Depanneuse',
+  'F' = "Vehicule d'instruction",
+  'I' = 'Industriel',
+  'L' = 'Location sans chauffeur',
+  'M' = 'Motor-home',
+  'P' = "Vehicule d'incendie",
+  'R' = 'Ramassage scolaire',
+  'S' = 'Vehicule de secours',
+  'T' = 'Taxi',
+  'X' = 'Mma >3500 (Catégorie 59)',
+  'Z' = 'Vehicule forain',
+  .default = "Autre"
+)
 
-# Remove duplicate values
+label(vehcln$LIBUTI) <- "Indication of use label"
+
+# Verify that LIBUTI is calculated correctly
+arrange(summarise(group_by(vehcln, INDUTI, LIBUTI), Count = n()), INDUTI)
+
+### PAYPVN ###
+# Values appear to be ISO 3166-1 alpha-2 codes
+# Values 10, ZZ are not ISO 3166-1 alpha-2 codes. Set to missing
+vehcln$PAYPVN[which(vehcln$PAYPVN %in% c("10", "ZZ", ""))] <- NA
+
+### CODMRQ ###
+# No need for cleaning
+
+### LIBMRQ ###
+vehcln$LIBMRQ[which(vehcln$LIBMRQ == " ")] <- NA
+
+### TYPUSI ###
+vehcln$TYPUSI[which(vehcln$TYPUSI == "")] <- NA
+
+#### TYPCOM ###
+vehcln$TYPCOM[which(vehcln$TYPCOM %in% c("", " "))] <- NA
+
+### PVRNUM ###
+# No need for cleaning
+
+### PVRVAR ###
+# No need for cleaning
+
+### PVRVER ###
+vehcln$PVRVER[which(vehcln$PVRVER %in% c("", " "))] <- NA
+
+### DATCIRPRM ###
+# No need for cleaning
+
+### DATCIR_GD ###
+# No need for cleaning
+
+### DATCIR ###
+# No need for cleaning
+
+### DATHORCIR ###
+# No need for cleaning
+# All values are missing
+
+### MVID ###
+# No need for cleaning
+
+### MMA ###
+# No need for cleaning
+
+### MMAENS ###
+# No need for cleaning
+
+### MMAATT ###
+# No need for cleaning
+
+### MMARSF ###
+# No need for cleaning
+
+### MMARAF ###
+# No need for cleaning
+
+### I4X4 ###
+vehcln$I4X4[which(vehcln$I4X4 == "")] <- NA
+
+### ABS ###
+# No need for cleaning
+
+### ASR ###
+# No need for cleaning
+
+### PLAAVA ###
+# No need for cleaning
+
+### PLAARR ###
+# No need for cleaning
+
+### PLASAV ###
+# No need for cleaning
+
+### PLASAR ###
+# No need for cleaning
+
+### PLADEB ###
+# No need for cleaning
+
+### PLAASS ###
+# No need for cleaning
+
+### LON ###
+# No need for cleaning
+
+### LAR ###
+# No need for cleaning
+
+### HAU ###
+# No need for cleaning
+
+### ESSIM ###
+# No need for cleaning
+
+### ESTAN ###
+# No need for cleaning
+
+### ESTRI ###
+# No need for cleaning
+
+### EMPMAX ###
+# No need for cleaning
+
+### LARES1 ###
+# No need for cleaning
+
+### LARES2 ###
+# No need for cleaning
+
+### TYPMOT ###
+vehcln$TYPMOT[which(vehcln$TYPMOT %in% c("", " "))] <- NA
+
+### CODCRB ###
+vehcln$CODCRB[which(vehcln$CODCRB %in% c("", " "))] <- NA
+
+### LIBCRB ###
+vehcln$LIBCRB[which(vehcln$LIBCRB == "")] <- NA
+
+### NBRCYL ###
+# No need for cleaning
+
+### PKW ###
+# No need for cleaning
+
+### CYD ###
+# No need for cleaning
+
+### INFOUTI ###
+# No need for cleaning
+
+### INFCO2 ###
+# No need for cleaning
+
+### L100KM ###
+# No need for cleaning
+
+### INFPARTICULE ###
+# No need for cleaning
+
+### INFNOX ###
+vehcln$EUNORM[which(vehcln$EUNORM == "")] <- NA
+
+# Remove duplicate rows
+
 
 # Reorder columns
 vehcln <-  vehcln[c(
@@ -344,6 +487,7 @@ vehcln <-  vehcln[c(
   "CATEU",
   "COUL",
   "INDUTI",
+  "LIBUTI",
   "PAYPVN",
   "CODMRQ",
   "LIBMRQ",
@@ -394,38 +538,29 @@ vehcln <-  vehcln[c(
   "EUNORM"
 )]
 
-paste(
-  "The dataset has",
-  ncol(vehcln),
-  "columns."
-)
+paste("The dataset has",
+      ncol(vehcln),
+      "columns.")
 
-paste(
-  "The dataset has",
-  nrow(vehcln),
-  "rows."
-)
+paste("The dataset has",
+      nrow(vehcln),
+      "rows.")
 
-paste(
-  "The dataset has",
-  ncol(vehcln) * nrow(vehcln),
-  "values."
-)
+paste("The dataset has",
+      ncol(vehcln) * nrow(vehcln),
+      "values.")
 
-paste(
-  "The dataset has",
-  sum(is.na(vehcln)),
-  "missing values (",
-  round(100 * sum(is.na(vehcln)) / (ncol(vehcln) * nrow(vehcln)), 1),
-  "%)."
-)
+paste("The dataset has",
+      sum(is.na(vehcln)),
+      "missing values (",
+      round(100 * sum(is.na(vehcln)) / (ncol(vehcln) * nrow(vehcln)), 1),
+      "%).")
 
 # Save dataset
 save(vehcln, file = file.path("input", "vehcln.RData"))
 
 # Remove objects
-# rm("column_labels",
-#    "Column.label.EN",
-#    "Column.name",
-#    "vehcln"
-# )
+rm("CODCAR.LIBCAR",
+   "vehcol",
+   "vehcln"
+)
