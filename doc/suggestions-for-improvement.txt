@@ -1,4 +1,9 @@
 - Column OPE is in the PDF and the XSD but is missing from the XML data
+- CATÉGORIE STATEC REGROUPÉE is in the PDF but is missing from the XML data
+   Voitures (Cars)
+   Poids lourds (Heavyweight vehicles) 
+   Véhicules à 2/3 roues (Bike/Trike) 
+   Remorques (Trailers)
 
 - Element 'CODCRB': '' is not a valid value of the local atomic type (23334 cases)
 - Element 'LIBCRB': 'ESSENCE / ETHANOL' is not a valid value of the local atomic type (61 cases)
