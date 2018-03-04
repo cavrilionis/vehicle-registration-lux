@@ -86,7 +86,8 @@ dict <- select(dict, -Count.distinct)
 
 # Column source
 dict$Column.source <- "Raw"
-dict$Column.source[which(dict$Column.name == "LIBSTC")] <- "Derived"
+dict$Column.source[which(dict$Column.name %in% c("LIBSTC", "LIBUTI"))] <-
+  "Derived"
 
 # Measurement
 dict$Column.measurement <-
@@ -144,7 +145,7 @@ save(dict, file = file.path("doc", "data-dictionary.RData"))
 
 # Remove objects
 rm(
-  "dict",
+  #"dict",
   "dict.class",
   "dict.labels",
   "dict.n_distinct",
