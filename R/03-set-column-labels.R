@@ -38,5 +38,6 @@ save(vehcol, file = file.path("input", "vehcol.RData"))
 rm("column_labels",
    "Column.label.EN",
    "Column.name",
-   "vehcol"
+   "vehcol",
+   "vehraw"
 )
