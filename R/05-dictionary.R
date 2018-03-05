@@ -145,7 +145,7 @@ save(dict, file = file.path("doc", "data-dictionary.RData"))
 
 # Remove objects
 rm(
-  #"dict",
+  "dict",
   "dict.class",
   "dict.labels",
   "dict.n_distinct",
