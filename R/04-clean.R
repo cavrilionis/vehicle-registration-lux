@@ -42,7 +42,7 @@ vehcln$LIBSTC <- recode(
 label(vehcln$LIBSTC) <- "Category Label Statec"
 
 # Verify that CATSTC.v2 and LIBSTC are calculated correctly
-arrange(summarise(group_by(vehcln, CATSTC, CATSTC.v2, LIBSTC), Count = n()), CATSTC.v2)
+# arrange(summarise(group_by(vehcln, CATSTC, CATSTC.v2, LIBSTC), Count = n()), CATSTC.v2)
 
 # Drop original CATSTC
 vehcln <- select(vehcln, -CATSTC)
@@ -329,7 +329,7 @@ vehcln$LIBUTI <- recode(
 label(vehcln$LIBUTI) <- "Indication of use label"
 
 # Verify that LIBUTI is calculated correctly
-arrange(summarise(group_by(vehcln, INDUTI, LIBUTI), Count = n()), INDUTI)
+# arrange(summarise(group_by(vehcln, INDUTI, LIBUTI), Count = n()), INDUTI)
 
 ### PAYPVN ###
 # Values appear to be ISO 3166-1 alpha-2 codes
@@ -475,8 +475,12 @@ vehcln$LIBCRB[which(vehcln$LIBCRB == "")] <- NA
 ### INFNOX ###
 vehcln$EUNORM[which(vehcln$EUNORM == "")] <- NA
 
-# Remove duplicate rows
+# Identify duplicate rows
+vehcln$dup <- duplicated(vehcln) 
 
+paste("The dataset has",
+      sum(vehcln$dup),
+      "duplicate rows.")
 
 # Reorder columns
 vehcln <-  vehcln[c(
