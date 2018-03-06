@@ -15,33 +15,57 @@ describe(vehcln)
 ### SAVAS ###
 
 
-myCols <- dict$Column.ID[which(dict$Column.class == "character")]
+myCols <- as.vector(dict$Column.name[which(dict$Column.class == "character")])
 myCols
 
 for (i in seq_along(myCols)) {
-  names((vehcln[i]) <- as.data.frame(table(vehcln[i]))
+  j <- paste0("vehcln$",myCols[i])
+  print(table(j, useNA = "always"))
 }
 
 
 
 # Frequency tables
 
+
 freq_plot <- function(col_name) {
-  vehcln %>%
-    group_by_(col_name) %>%
-      summarise(Freq = n()) -> temp
-  temp$CumFreq <- cumsum(temp$Freq)
+  col_name <- enquo(col_name)
+  temp <- summarise(group_by(vehcln, !!col_name), Freq = n())
   temp$Prop <- round(100 * prop.table(temp$Freq), 2)
+  temp <- mutate(temp, Category = ifelse(temp$Prop <= 5, "Other", !!col_name))
+  temp <- summarise(group_by(temp, Category), Freq = sum(Freq))
+  temp$Prop <- round(100 * prop.table(temp$Freq), 2)
+  temp$CumFreq <- cumsum(temp$Freq)
   temp$CumProp <- round(cumsum(temp$Prop), 1)
   label(temp$Freq) <- "Frequency"
   label(temp$CumFreq) <- "Cumulative frequency"
   label(temp$Prop) <- "Percent"
   label(temp$CumProp) <- "Cumulative percent"
   temp <- arrange(temp, desc(Freq))
-  return(temp)
+  
+  return(temp)  
 }
 
-CATSTC <- freq_plot('CATSTC')
+CATSTC <- freq_plot(CATSTC)
+CATSTC
+View(CATSTC)
+
+
+ggplot(data = CATSTC, aes(x = Category, y = Prop)) +
+  geom_bar(stat = "identity") +
+  xlab(label = NULL) +
+  ylab(label = label(CATSTC$Prop)) +
+  theme_hc() +
+  theme(axis.ticks = element_blank()) +
+  scale_y_continuous(limits = c(0, ceiling(max(CATSTC$Prop)) + (10 - ceiling(max(CATSTC$Prop)) %% 10))) +
+  labs(title = label(vehcln$CATSTC),
+       caption = "Category 'Other' groups categories where percent <= 5%")
+
+ggsave(plot = last_plot(),
+       path = "output",
+       filename = "CATSTC.png")
+
+
 LIBSTC <- freq_plot('LIBSTC')
 CODCAR <- freq_plot('CODCAR')
 LIBCAR <- freq_plot('LIBCAR')
@@ -74,12 +98,6 @@ paste(char_cols$Column.name, " <- ", "freq_plot('",char_cols$Column.name, "')", 
 ggplot(data = vehcln, aes(x = CATSTC)) +
   geom_bar()
 
-ggplot(data = CATSTC2, aes(x = CATSTC, y = Prop)) +
-  geom_bar(stat = "identity")
-
-ggsave(plot = last_plot(),
-       path = "output",
-       filename = "CATSTC.png")
 
 # Mode (most frequent value) for nominal variables
 
