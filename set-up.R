@@ -12,6 +12,7 @@ list.of.packages <-
     "tibble",
     "tidyr",
     # "padr",
+    "rlang",
     # "utils",
     "ggplot2",
     "ggthemes")
