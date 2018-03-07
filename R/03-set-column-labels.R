@@ -13,7 +13,7 @@ label(vehcol)
 # Read column names and labels from external file
 column_labels <- read.fwf(
   file = file.path("doc", "column_labels.txt"),
-  widths = c(21, 51, 75),
+  widths = c(21, 51, 81),
   header = FALSE,
   col.names = c("Column.name", "Column.label.FR", "Column.label.EN")
 )
