@@ -98,6 +98,9 @@ paste(char_cols$Column.name, " <- ", "freq_plot('",char_cols$Column.name, "')", 
 ggplot(data = vehcln, aes(x = CATSTC)) +
   geom_bar()
 
+ggplot(data = subset(vehcln, CATSTC = "05")) +
+  geom_point(aes(x = MVID, y = MMA))
+
 
 # Mode (most frequent value) for nominal variables
 
