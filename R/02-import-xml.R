@@ -26,14 +26,21 @@ for (i in 1:length(out[["errors"]])) {
 
 out.errors <- as.data.frame(out.errors)
 
-out.errors.report <- as.data.frame(table(out.errors[1], useNA = "ifany"))
+out.errors.report <-
+  as.data.frame(table(out.errors[1], useNA = "ifany"))
 
 # out.errors.report$toto <- out.errors.report$Var1
 
-out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 39) == "Element 'LIBCRB': [facet 'enumeration']")] <- "LIBCRB 'ESSENCE / ETHANOL'\nis not an element in the\nXSD enumeration"
-out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 16) == "Element 'CODCRB'")] <- "Empty CODCRB"
-out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 37) == "Element 'LIBCRB': 'ESSENCE / ETHANOL'")] <- "'ESSENCE / ETHANOL'\nis not a valid value of the\nlocal atomic type"
-xml.errors.report <- out.errors.report[,c(3,2)]
+out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 39) == "Element 'LIBCRB': [facet 'enumeration']")] <-
+  "LIBCRB 'ESSENCE / ETHANOL'\nis not an element in the\nXSD enumeration"
+
+out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 16) == "Element 'CODCRB'")] <-
+  "Empty CODCRB"
+
+out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 37) == "Element 'LIBCRB': 'ESSENCE / ETHANOL'")] <-
+  "'ESSENCE / ETHANOL'\nis not a valid value of the\nlocal atomic type"
+
+xml.errors.report <- out.errors.report[, c(3, 2)]
 
 suppressWarnings(
   print(
@@ -69,9 +76,7 @@ colClasses <-
 colClasses <- as.vector(colClasses$Class)
 
 # Create class to convert dates from character to date
-setClass('myDate')
-setAs("character", "myDate", function(from)
-  as.Date(from, format = "%Y%m%d"))
+setClass('myDate') setAs("character", "myDate", function(from) as.Date(from, format = "%Y%m%d"))
 
 # Convert XML to data frame using package "XML"
 vehraw <-
@@ -93,7 +98,9 @@ cat("The dataset has",
     "columns.\n")
 
 # Save dataset
-save(xml.errors.report, file = file.path("output", "xml-validation-errors.RData"))
+save(xml.errors.report,
+     file = file.path("output", "xml-validation-errors.RData"))
+
 save(vehraw, file = file.path("input", "vehraw.RData"))
 
 # Remove objects
@@ -104,5 +111,4 @@ rm("colClasses",
    "out.errors",
    "out.errors.report",
    "vehraw",
-   "xsd"
-)
+   "xsd")
