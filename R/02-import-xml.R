@@ -11,66 +11,52 @@ xsd <-
 
 # Validate XML using XSD using package "XML"
 out <- xmlSchemaValidate(schema = xsd, doc = doc)
-XMLValidationErrors <- as_data_frame(out["errors"])
 
-write.table(
-  XMLValidationErrors,
-  file = file.path("output", "XML-Validation-Errors.txt"),
-  sep = "|"
-)
+# Report XML Validation Errors
 
-# Remove unnecessary line breaks manually in XML-Validation-Errors.txt
-# and create a copy as XML-Validation-Errors-clean.txt
+i <- 0L
 
-# Count XML validation errors
+for (i in 1:length(out[["errors"]])) {
+  if (i == 1) {
+    out.errors <- out[["errors"]][[i]][["msg"]]
+  } else {
+    out.errors <- c(out.errors, out[["errors"]][[i]][["msg"]])
+  }
+}
 
-XML.vld.err <-
-  read.delim(
-    file.path("output", "XML-Validation-Errors-clean.txt"),
-    header = TRUE,
-    sep = "|"
-  )
+out.errors <- as.data.frame(out.errors)
 
-XML.vld.err <-
-  mutate(
-    XML.vld.err,
-    Error.v2 = ifelse(
-      substr(Error, 1, 27) == "list(msg = Element 'CODCRB'",
-      "Empty CODCRB",
-      ifelse(
-        substr(Error, 1, 50) == "list(msg = Element 'LIBCRB': [facet 'enumeration']",
-        "LIBCRB 'ESSENCE / ETHANOL' is not an element in the XSD enumeration",
-        ifelse(
-          substr(Error, 1, 95) == "list(msg = Element 'LIBCRB': 'ESSENCE / ETHANOL' is not a valid value of the local atomic type.",
-          "LIBCRB 'ESSENCE / ETHANOL' is not a valid value of the local atomic type",
-          NA
+out.errors.report <- as.data.frame(table(out.errors[1], useNA = "ifany"))
+
+# out.errors.report$toto <- out.errors.report$Var1
+
+out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 39) == "Element 'LIBCRB': [facet 'enumeration']")] <- "LIBCRB 'ESSENCE / ETHANOL'\nis not an element in the\nXSD enumeration"
+out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 16) == "Element 'CODCRB'")] <- "Empty CODCRB"
+out.errors.report$Error[which(substr(out.errors.report$Var1, 1, 37) == "Element 'LIBCRB': 'ESSENCE / ETHANOL'")] <- "'ESSENCE / ETHANOL'\nis not a valid value of the\nlocal atomic type"
+xml.errors.report <- out.errors.report[,c(3,2)]
+
+suppressWarnings(
+  print(
+    ggplot(data = out.errors.report, aes(x = Error, y = Freq)) +
+      geom_bar(stat = "identity") +
+      ggtitle("XML validation errors") +
+      scale_y_log10(
+        name = "Frequency (log scale)",
+        limits = c(NA, 1e5),
+        labels = scales::comma
+      ) +
+      xlab(label = NULL) +
+      theme_minimal() +
+      theme(panel.grid.major.x = element_blank()) +
+      scale_fill_few() +
+      scale_x_discrete(
+        limits = c(
+          "Empty CODCRB",
+          "LIBCRB 'ESSENCE / ETHANOL'\nis not an element in the\nXSD enumeration"
         )
       )
-    )
   )
-
-XML.vld.err <- select(XML.vld.err, -Error)
-XML.vld.err <- rename(XML.vld.err, "Error" = "Error.v2")
-save(XML.vld.err, file = file.path("output", "XML-Validation-Errors.RData"))
-
-XML.vld.rpt <- as.data.frame(table(XML.vld.err$Error))
-names(XML.vld.rpt) <- c("Error", "Frequency")
-save(XML.vld.rpt, file = file.path("output", "XML-Validation-Report.RData"))
-
-ggplot(data = XML.vld.err) +
-  geom_bar(mapping = aes(Error)) +
-  ggtitle("XML validation errors") +
-  scale_y_log10(name = "Frequency", limits = c(NA, 1e5)) +
-  coord_flip() +
-  theme_minimal() +
-  scale_fill_few() +
-  scale_x_discrete(
-    labels = c(
-      "Empty CODCRB" = "Empty\nCODCRB",
-      "LIBCRB 'ESSENCE / ETHANOL' is not an element in the XSD enumeration" = "LIBCRB 'ESSENCE / ETHANOL'\nis not an element in the\nXSD enumeration",
-      "LIBCRB 'ESSENCE / ETHANOL' is not a valid value of the local atomic type" = "LIBCRB 'ESSENCE / ETHANOL'\nis not a valid value of the\nlocal atomic type"
-    )
-  )
+)
 
 ggsave(plot = last_plot(),
        path = "graphics",
@@ -107,15 +93,16 @@ cat("The dataset has",
     "columns.\n")
 
 # Save dataset
+save(xml.errors.report, file = file.path("output", "xml-validation-errors.RData"))
 save(vehraw, file = file.path("input", "vehraw.RData"))
 
 # Remove objects
 rm("colClasses",
    "doc",
+   "i",
    "out",
+   "out.errors",
+   "out.errors.report",
    "vehraw",
-   "XMLValidationErrors",
-   "XML.vld.err",
-   "XML.vld.rpt",
    "xsd"
 )
